@@ -592,7 +592,6 @@
   "poll_button.remove_poll": "إزالة استطلاع الرأي",
   "privacy.change": "اضبط خصوصية المنشور",
   "privacy.direct.long": "كل من ذُكر في المنشور",
-  "privacy.direct.short": "أشخاص محددون",
   "privacy.private.long": "متابعيك فقط",
   "privacy.private.short": "للمتابِعين",
   "privacy.public.long": "أي شخص على أو خارج ماستدون",
@@ -785,8 +784,6 @@
   "video.expand": "توسيع الفيديو",
   "video.fullscreen": "ملء الشاشة",
   "video.hide": "إخفاء الفيديو",
-  "video.mute": "كتم الصوت",
   "video.pause": "إيقاف مؤقت",
-  "video.play": "تشغيل",
-  "video.unmute": "تشغيل الصوت"
+  "video.play": "تشغيل"
 }

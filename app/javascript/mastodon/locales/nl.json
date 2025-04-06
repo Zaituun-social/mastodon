@@ -65,6 +65,7 @@
   "account.statuses_counter": "{count, plural, one {{counter} bericht} other {{counter} berichten}}",
   "account.unblock": "@{name} deblokkeren",
   "account.unblock_domain": "{domain} niet langer blokkeren",
+  "account.unblock_domain_short": "Deblokkeren",
   "account.unblock_short": "Deblokkeren",
   "account.unendorse": "Niet op profiel weergeven",
   "account.unfollow": "Ontvolgen",
@@ -872,7 +873,9 @@
   "subscribed_languages.target": "Getoonde talen voor {target} wijzigen",
   "tabs_bar.home": "Start",
   "tabs_bar.notifications": "Meldingen",
+  "terms_of_service.effective_as_of": "Van kracht met ingang van {date}",
   "terms_of_service.title": "Gebruiksvoorwaarden",
+  "terms_of_service.upcoming_changes_on": "Aankomende wijzigingen op {date}",
   "time_remaining.days": "{number, plural, one {# dag} other {# dagen}} te gaan",
   "time_remaining.hours": "{number, plural, one {# uur} other {# uur}} te gaan",
   "time_remaining.minutes": "{number, plural, one {# minuut} other {# minuten}} te gaan",
@@ -903,8 +906,12 @@
   "video.expand": "Video groter maken",
   "video.fullscreen": "Volledig scherm",
   "video.hide": "Video verbergen",
-  "video.mute": "Geluid uitschakelen",
+  "video.mute": "Dempen",
   "video.pause": "Pauze",
   "video.play": "Afspelen",
-  "video.unmute": "Geluid inschakelen"
+  "video.skip_backward": "Terugspoelen",
+  "video.skip_forward": "Vooruitspoelen",
+  "video.unmute": "Dempen opheffen",
+  "video.volume_down": "Volume omlaag",
+  "video.volume_up": "Volume omhoog"
 }

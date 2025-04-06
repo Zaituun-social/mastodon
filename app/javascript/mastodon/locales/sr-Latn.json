@@ -527,7 +527,6 @@
   "poll_button.remove_poll": "Ukloni anketu",
   "privacy.change": "Promeni privatnost objave",
   "privacy.direct.long": "Svi pomenuti u objavi",
-  "privacy.direct.short": "Određeni ljudi",
   "privacy.private.long": "Samo vaši pratioci",
   "privacy.private.short": "Pratioci",
   "privacy.public.long": "Bilo ko na Mastodon-u i van njega",
@@ -714,8 +713,6 @@
   "video.expand": "Proširi video",
   "video.fullscreen": "Ceo ekran",
   "video.hide": "Sakrij video",
-  "video.mute": "Isključi zvuk",
   "video.pause": "Pauziraj",
-  "video.play": "Reprodukuj",
-  "video.unmute": "Uključi zvuk"
+  "video.play": "Reprodukuj"
 }

@@ -196,6 +196,8 @@ Rails.application.routes.draw do
 
   draw(:api)
 
+  draw(:fasp)
+
   draw(:web_app)
 
   get '/web/(*any)', to: redirect('/%{any}', status: 302), as: :web, defaults: { any: '' }, format: false
@@ -204,7 +206,8 @@ Rails.application.routes.draw do
 
   get '/privacy-policy',   to: 'privacy#show', as: :privacy_policy
   get '/terms-of-service', to: 'terms_of_service#show', as: :terms_of_service
-  get '/terms',            to: redirect('/terms-of-service')
+  get '/terms-of-service/:date', to: 'terms_of_service#show', as: :terms_of_service_version
+  get '/terms', to: redirect('/terms-of-service')
 
   match '/', via: [:post, :put, :patch, :delete], to: 'application#raise_not_found', format: false
   match '*unmatched_route', via: :all, to: 'application#raise_not_found', format: false
