@@ -111,6 +111,7 @@ sudo -u postgres createdb -U postgres mastodon_development
 cd /vagrant # This is where the host folder/repo is mounted
 
 # Install gems
+gem update --system
 gem install bundler foreman
 bundle install
 
@@ -164,7 +165,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #
   # To install:
   #   $ vagrant plugin install vagrant-hostsupdater
-  config.vm.hostname = "mastodon.local"
+  config.vm.hostname = "zai.local"
 
   if defined?(VagrantPlugins::HostsUpdater)
     config.vm.network :private_network, ip: "192.168.42.42", nictype: "virtio"
@@ -195,7 +196,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.post_up_message = <<MESSAGE
 To start server
-  $ vagrant ssh -c "cd /vagrant && bin/dev"
+  $ vagrant ssh -c "cd /vagrant && foreman start"
 MESSAGE
 
 end
