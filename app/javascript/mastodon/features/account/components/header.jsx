@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { Helmet } from 'react-helmet';
 import { NavLink, withRouter } from 'react-router-dom';
 
+import { isFulfilled, isRejected } from '@reduxjs/toolkit';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import ImmutablePureComponent from 'react-immutable-pure-component';
 
@@ -92,10 +93,10 @@ const messageForFollowButton = relationship => {
 
   if (relationship.get('following') && relationship.get('followed_by')) {
     return messages.mutual;
-  } else if (!relationship.get('following') && relationship.get('followed_by')) {
-    return messages.followBack;
-  } else if (relationship.get('following')) {
+  } else if (relationship.get('following') || relationship.get('requested')) {
     return messages.unfollow;
+  } else if (relationship.get('followed_by')) {
+    return messages.followBack;
   } else {
     return messages.follow;
   }
@@ -215,8 +216,20 @@ class Header extends ImmutablePureComponent {
 
       const link = e.currentTarget;
 
-      onOpenURL(link.href, history, () => {
-        window.location = link.href;
+      onOpenURL(link.href).then((result) => {
+        if (isFulfilled(result)) {
+          if (result.payload.accounts[0]) {
+            history.push(`/@${result.payload.accounts[0].acct}`);
+          } else if (result.payload.statuses[0]) {
+            history.push(`/@${result.payload.statuses[0].account.acct}/${result.payload.statuses[0].id}`);
+          } else {
+            window.location = link.href;
+          }
+        } else if (isRejected(result)) {
+          window.location = link.href;
+        }
+      }).catch(() => {
+        // Nothing
       });
     }
   };
@@ -291,10 +304,8 @@ class Header extends ImmutablePureComponent {
     if (me !== account.get('id')) {
       if (signedIn && !account.get('relationship')) { // Wait until the relationship is loaded
         actionBtn = <Button disabled><LoadingIndicator /></Button>;
-      } else if (account.getIn(['relationship', 'requested'])) {
-        actionBtn = <Button text={intl.formatMessage(messages.cancel_follow_request)} title={intl.formatMessage(messages.requested)} onClick={this.props.onFollow} />;
       } else if (!account.getIn(['relationship', 'blocking'])) {
-        actionBtn = <Button disabled={account.getIn(['relationship', 'blocked_by'])} className={classNames({ 'button--destructive': account.getIn(['relationship', 'following']) })} text={intl.formatMessage(messageForFollowButton(account.get('relationship')))} onClick={signedIn ? this.props.onFollow : this.props.onInteractionModal} />;
+        actionBtn = <Button disabled={account.getIn(['relationship', 'blocked_by'])} className={classNames({ 'button--destructive': (account.getIn(['relationship', 'following']) || account.getIn(['relationship', 'requested'])) })} text={intl.formatMessage(messageForFollowButton(account.get('relationship')))} onClick={signedIn ? this.props.onFollow : this.props.onInteractionModal} />;
       } else if (account.getIn(['relationship', 'blocking'])) {
         actionBtn = <Button text={intl.formatMessage(messages.unblock, { name: account.get('username') })} onClick={this.props.onBlock} />;
       }
@@ -423,7 +434,7 @@ class Header extends ImmutablePureComponent {
 
         <div className='account__header__bar'>
           <div className='account__header__tabs'>
-            <a className='avatar' href={account.get('avatar')} rel='noopener noreferrer' target='_blank' onClick={this.handleAvatarClick}>
+            <a className='avatar' href={account.get('avatar')} rel='noopener' target='_blank' onClick={this.handleAvatarClick}>
               <Avatar account={suspended || hidden ? undefined : account} size={90} />
             </a>
 

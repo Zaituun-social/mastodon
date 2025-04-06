@@ -6,18 +6,17 @@ import { PureComponent } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import classNames from 'classnames';
-import { Link } from 'react-router-dom';
 
 
-import Immutable from 'immutable';
+import { is } from 'immutable';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 
 import DescriptionIcon from '@/material-icons/400-24px/description-fill.svg?react';
 import OpenInNewIcon from '@/material-icons/400-24px/open_in_new.svg?react';
 import PlayArrowIcon from '@/material-icons/400-24px/play_arrow-fill.svg?react';
-import { Avatar } from 'mastodon/components/avatar';
 import { Blurhash } from 'mastodon/components/blurhash';
 import { Icon }  from 'mastodon/components/icon';
+import { MoreFromAuthor } from 'mastodon/components/more_from_author';
 import { RelativeTimestamp } from 'mastodon/components/relative_timestamp';
 import { useBlurhash } from 'mastodon/initial_state';
 
@@ -59,20 +58,6 @@ const addAutoPlay = html => {
   return html;
 };
 
-const MoreFromAuthor = ({ author }) => (
-  <div className='more-from-author'>
-    <svg viewBox='0 0 79 79' className='logo logo--icon' role='img'>
-      <use xlinkHref='#logo-symbol-icon' />
-    </svg>
-
-    <FormattedMessage id='link_preview.more_from_author' defaultMessage='More from {name}' values={{ name: <Link to={`/@${author.get('acct')}`}><Avatar account={author} size={16} /> {author.get('display_name')}</Link> }} />
-  </div>
-);
-
-MoreFromAuthor.propTypes = {
-  author: ImmutablePropTypes.map,
-};
-
 export default class Card extends PureComponent {
 
   static propTypes = {
@@ -88,7 +73,7 @@ export default class Card extends PureComponent {
   };
 
   UNSAFE_componentWillReceiveProps (nextProps) {
-    if (!Immutable.is(this.props.card, nextProps.card)) {
+    if (!is(this.props.card, nextProps.card)) {
       this.setState({ embedded: false, previewLoaded: false });
     }
 
@@ -153,10 +138,10 @@ export default class Card extends PureComponent {
     const interactive = card.get('type') === 'video';
     const language    = card.get('language') || '';
     const largeImage  = (card.get('image')?.length > 0 && card.get('width') > card.get('height')) || interactive;
-    const showAuthor  = !!card.get('author_account');
+    const showAuthor  = !!card.getIn(['authors', 0, 'accountId']);
 
     const description = (
-      <div className='status-card__content'>
+      <div className='status-card__content' dir='auto'>
         <span className='status-card__host'>
           <span lang={language}>{provider}</span>
           {card.get('published_at') && <> · <RelativeTimestamp timestamp={card.get('published_at')} /></>}
@@ -223,7 +208,7 @@ export default class Card extends PureComponent {
               <div className='status-card__actions' onClick={this.handleEmbedClick} role='none'>
                 <div>
                   <button type='button' onClick={this.handleEmbedClick}><Icon id='play' icon={PlayArrowIcon} /></button>
-                  <a href={card.get('url')} onClick={this.handleExternalLinkClick} target='_blank' rel='noopener noreferrer'><Icon id='external-link' icon={OpenInNewIcon} /></a>
+                  <a href={card.get('url')} onClick={this.handleExternalLinkClick} target='_blank' rel='noopener'><Icon id='external-link' icon={OpenInNewIcon} /></a>
                 </div>
               </div>
             ) : spoilerButton}
@@ -234,7 +219,7 @@ export default class Card extends PureComponent {
       return (
         <div className={classNames('status-card', { expanded: largeImage })} ref={this.setRef} onClick={revealed ? null : this.handleReveal} role={revealed ? 'button' : null}>
           {embed}
-          <a href={card.get('url')} target='_blank' rel='noopener noreferrer'>{description}</a>
+          <a href={card.get('url')} target='_blank' rel='noopener'>{description}</a>
         </div>
       );
     } else if (card.get('image')) {
@@ -254,12 +239,12 @@ export default class Card extends PureComponent {
 
     return (
       <>
-        <a href={card.get('url')} className={classNames('status-card', { expanded: largeImage, bottomless: showAuthor })} target='_blank' rel='noopener noreferrer' ref={this.setRef}>
+        <a href={card.get('url')} className={classNames('status-card', { expanded: largeImage, bottomless: showAuthor })} target='_blank' rel='noopener' ref={this.setRef}>
           {embed}
           {description}
         </a>
 
-        {showAuthor && <MoreFromAuthor author={card.get('author_account')} />}
+        {showAuthor && <MoreFromAuthor accountId={card.getIn(['authors', 0, 'accountId'])} />}
       </>
     );
   }
