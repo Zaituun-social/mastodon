@@ -928,7 +928,7 @@ en:
         message_html: No Sidekiq process running for the %{value} queue(s). Please review your Sidekiq configuration
       software_version_check:
         action: See available updates
-        message_html: A Mastodon update is available.
+        message_html: A Zai update is available.
       software_version_critical_check:
         action: See available updates
         message_html: A critical Zai update is available, please update as quickly as possible.
@@ -1222,7 +1222,7 @@ en:
     set_new_password: Set new password
     setup:
       email_below_hint_html: Check your spam folder, or request another one. You can correct your email address if it's wrong.
-      email_settings_hint_html: Click the link we sent to %{email} to begin using Mastodon. We'll wait right here.
+      email_settings_hint_html: Click the link we sent to %{email} to begin using Zai. We'll wait right here.
       link_not_received: Didn't get a link?
       new_confirmation_instructions_sent: You will receive a new email with the confirmation link in a few minutes!
       title: Check your inbox
@@ -1247,7 +1247,7 @@ en:
     user_privacy_agreement_html: I have read and agree to the <a href="%{privacy_policy_path}" target="_blank">privacy policy</a>
   author_attribution:
     example_title: Sample text
-    hint_html: Are you writing news or blog articles outside of Mastodon? Control how you get credited when they are shared on Mastodon.
+    hint_html: Are you writing news or blog articles outside of Zai? Control how you get credited when they are shared on Zai.
     instructions: 'Make sure this code is in your article''s HTML:'
     more_from_html: More from %{name}
     s_blog: "%{name}'s Blog"
