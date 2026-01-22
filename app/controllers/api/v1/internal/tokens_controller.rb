@@ -17,6 +17,8 @@ class Api::V1::Internal::TokensController < Api::V1::Internal::BaseController
     render json: { error: e.message }, status: 404
   rescue Mastodon::NotPermittedError => e
     render json: { error: e.message }, status: 403
+  rescue StandardError => e
+    render json: { error: e.class.name, message: e.message }, status: 500
   end
 
   private
@@ -55,7 +57,7 @@ class Api::V1::Internal::TokensController < Api::V1::Internal::BaseController
       scope: token.scopes.to_s,
       created_at: token.created_at.to_i,
       expires_in: token.expires_in,
-      account_id: Account.find_by(user_id: token.resource_owner_id)&.id&.to_s,
+      account_id: User.find(token.resource_owner_id)&.account_id&.to_s,
     }
   end
 end
