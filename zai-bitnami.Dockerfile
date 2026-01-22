@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 docker.io/bitnami/mastodon:4.3.6-debian-12-r0
+FROM --platform=linux/amd64 docker.io/bitnamilegacy/mastodon:4.3.6-debian-12-r0
 
 # Copy Zai-modified-Mastodon sources into layer
 COPY app/javascript/images /opt/bitnami/mastodon/app/javascript/images
