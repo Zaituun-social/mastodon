@@ -153,22 +153,25 @@ RSpec.describe 'Internal Accounts API' do
     end
   end
 
-  describe 'DELETE /api/v1/internal/accounts/:id' do
+  describe 'DELETE /api/v1/internal/accounts/destroy' do
     let!(:account) { Fabricate(:account, username: 'todelete') }
-    let!(:user) { Fabricate(:user, account: account) }
+    let!(:user) { Fabricate(:user, account: account, email: 'todelete@example.com') }
 
     context 'with valid internal token' do
-      it 'deletes the account' do
-        delete "/api/v1/internal/accounts/#{account.id}",
+      it 'deletes the account by email' do
+        delete '/api/v1/internal/accounts/destroy',
+               params: { email: 'todelete@example.com' },
                headers: { 'X-Internal-Token' => internal_token }
 
         expect(response).to have_http_status(200)
         json = response.parsed_body
         expect(json['deleted']).to be true
+        expect(json['email']).to eq('todelete@example.com')
       end
 
-      it 'returns 404 for non-existent account' do
-        delete '/api/v1/internal/accounts/999999',
+      it 'returns 404 for non-existent email' do
+        delete '/api/v1/internal/accounts/destroy',
+               params: { email: 'nonexistent@example.com' },
                headers: { 'X-Internal-Token' => internal_token }
 
         expect(response).to have_http_status(404)

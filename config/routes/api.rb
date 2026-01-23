@@ -308,12 +308,13 @@ namespace :api, format: false do
     end
 
     namespace :internal do
-      resources :accounts, only: [:create, :update, :destroy] do
+      resources :accounts, only: [:create, :update] do
         member do
           post :approve
         end
         collection do
           post :approve_batch
+          delete :destroy, to: 'accounts#destroy'
         end
       end
       resources :tokens, only: [:create]

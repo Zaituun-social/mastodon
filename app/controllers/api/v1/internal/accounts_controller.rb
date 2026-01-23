@@ -45,7 +45,10 @@ class Api::V1::Internal::AccountsController < Api::V1::Internal::BaseController
   end
 
   def destroy
-    account = Account.find(params[:id])
+    user = User.find_by!(email: params[:email])
+    account = user.account
+
+    raise ActiveRecord::RecordNotFound, 'No account associated with user' if account.nil?
 
     DeleteAccountService.new.call(
       account,
@@ -54,7 +57,7 @@ class Api::V1::Internal::AccountsController < Api::V1::Internal::BaseController
     )
 
     log_internal_action(:delete_account, account)
-    render json: { id: account.id.to_s, username: account.username, deleted: true }, status: 200
+    render json: { id: account.id.to_s, username: account.username, email: user.email, deleted: true }, status: 200
   rescue ActiveRecord::RecordNotFound => e
     render json: { error: e.message }, status: 404
   end
