@@ -314,9 +314,9 @@ namespace :api, format: false do
         end
         collection do
           post :approve_batch
-          delete :destroy, to: 'accounts#destroy'
         end
       end
+      delete 'accounts', to: 'accounts#destroy'
       resources :tokens, only: [:create]
     end
   end
