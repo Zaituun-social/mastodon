@@ -19,7 +19,10 @@ class Api::V1::Internal::AccountsController < Api::V1::Internal::BaseController
   end
 
   def update
-    account = Account.find(params[:id])
+    user = User.find_by!(email: params[:old_email])
+    account = user.account
+
+    raise ActiveRecord::RecordNotFound, 'No account associated with user' if account.nil?
 
     result = Internal::ModifyAccountService.new.call(
       account: account,

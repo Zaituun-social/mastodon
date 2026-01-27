@@ -308,7 +308,7 @@ namespace :api, format: false do
     end
 
     namespace :internal do
-      resources :accounts, only: [:create, :update] do
+      resources :accounts, only: [:create] do
         member do
           post :approve
         end
@@ -316,6 +316,7 @@ namespace :api, format: false do
           post :approve_batch
         end
       end
+      patch 'accounts', to: 'accounts#update'
       delete 'accounts', to: 'accounts#destroy'
       resources :tokens, only: [:create]
     end
