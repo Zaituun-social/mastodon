@@ -11,11 +11,13 @@ class Internal::ModifyAccountService < BaseService
       apply_role_changes(user, options)
       apply_email_changes(user, options)
       apply_status_changes(user, options)
+      apply_account_changes(account, options)
 
       if options[:reset_password]
         result[:new_password] = reset_password(user)
       end
 
+      account.save!
       user.save!
     end
 
@@ -45,6 +47,10 @@ class Internal::ModifyAccountService < BaseService
     user.disabled = true if options[:disable]
     user.approved = true if options[:approve]
     user.disable_two_factor! if options[:disable_2fa]
+  end
+
+  def apply_account_changes(account, options)
+    account.display_name = options[:display_name] if options[:display_name].present?
   end
 
   def reset_password(user)

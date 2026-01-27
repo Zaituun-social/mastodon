@@ -31,7 +31,8 @@ class Api::V1::Internal::AccountsController < Api::V1::Internal::BaseController
       disable: modify_params[:disable],
       approve: modify_params[:approve],
       reset_password: modify_params[:reset_password],
-      disable_2fa: modify_params[:disable_2fa]
+      disable_2fa: modify_params[:disable_2fa],
+      display_name: modify_params[:display_name]
     )
 
     log_internal_action(:modify_account, account)
@@ -113,7 +114,7 @@ class Api::V1::Internal::AccountsController < Api::V1::Internal::BaseController
   end
 
   def modify_params
-    params.permit(:role, :remove_role, :email, :confirm, :enable, :disable, :approve, :reset_password, :disable_2fa)
+    params.permit(:role, :remove_role, :email, :confirm, :enable, :disable, :approve, :reset_password, :disable_2fa, :display_name)
   end
 
   def serialize_account(account)
