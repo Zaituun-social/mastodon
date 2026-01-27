@@ -306,6 +306,19 @@ namespace :api, format: false do
 
       resources :tags, only: [:index, :show, :update]
     end
+
+    namespace :internal do
+      resources :accounts, only: [:create, :update] do
+        member do
+          post :approve
+        end
+        collection do
+          post :approve_batch
+        end
+      end
+      delete 'accounts', to: 'accounts#destroy'
+      resources :tokens, only: [:create]
+    end
   end
 
   namespace :v2 do
