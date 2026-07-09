@@ -41,6 +41,7 @@ namespace :api, format: false do
       resource :public, only: :show, controller: :public
       resource :link, only: :show, controller: :link
       resources :tag, only: :show
+      resource :tags, only: :show, controller: :tags
       resources :list, only: :show
     end
 
