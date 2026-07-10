@@ -8,9 +8,9 @@ RSpec.describe 'Tags' do
   let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
   let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
 
-  describe 'GET /api/v1/timelines/tags' do
+  describe 'POST /api/v1/timelines/tags' do
     subject do
-      get '/api/v1/timelines/tags', headers: headers, params: params
+      post '/api/v1/timelines/tags', headers: headers, params: params
     end
 
     shared_examples 'a successful request to the tags timeline' do
@@ -103,16 +103,22 @@ RSpec.describe 'Tags' do
         expect(response.parsed_body.size).to eq(params[:limit])
       end
 
-      it 'sets the correct pagination headers, preserving tags', :aggregate_failures do
+      it 'does not set a pagination Link header' do
         subject
 
-        expect(response)
-          .to include_pagination_headers(
-            prev: api_v1_timelines_tags_url(limit: params[:limit], min_id: love_status.id, tags: %w(life love)),
-            next: api_v1_timelines_tags_url(limit: params[:limit], max_id: love_status.id, tags: %w(life love))
-          )
-        expect(response.content_type)
-          .to start_with('application/json')
+        expect(response.headers['Link']).to be_nil
+      end
+    end
+
+    context 'with max_id param' do
+      let(:params) { { tags: %w(life love), max_id: love_status.id } }
+
+      it 'returns only statuses older than max_id', :aggregate_failures do
+        subject
+
+        ids = response.parsed_body.pluck(:id)
+        expect(ids).to include(life_status.id.to_s)
+        expect(ids).to_not include(love_status.id.to_s)
       end
     end
 
