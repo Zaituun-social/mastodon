@@ -10,6 +10,11 @@ COPY app/controllers/api/v1/internal /opt/bitnami/mastodon/app/controllers/api/v
 COPY app/services/internal /opt/bitnami/mastodon/app/services/internal
 COPY config/routes/api.rb /opt/bitnami/mastodon/config/routes/api.rb
 
+# Copy multi-tag timeline endpoint
+COPY app/models/tags_feed.rb /opt/bitnami/mastodon/app/models/tags_feed.rb
+COPY spec/requests/api/v1/timelines/tags_spec.rb /opt/bitnami/mastodon/spec/requests/api/v1/timelines/tags_spec.rb
+COPY app/controllers/api/v1/timelines/tags_controller.rb /opt/bitnami/mastodon/app/controllers/api/v1/timelines/tags_controller.rb
+
 USER 1001
 ENTRYPOINT [ "/opt/bitnami/scripts/mastodon/entrypoint.sh" ]
 CMD [ "/opt/bitnami/scripts/mastodon/run.sh" ]
