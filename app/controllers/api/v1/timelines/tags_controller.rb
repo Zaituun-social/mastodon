@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 class Api::V1::Timelines::TagsController < Api::V1::Timelines::BaseController
+  # Tags are supplied in the request body (POST), so no pagination Link header
+  # is emitted: clients paginate with max_id/since_id/min_id in the body.
+  skip_after_action :insert_pagination_headers
+
   before_action -> { authorize_if_got_token! :read, :'read:statuses' }
 
-  PERMITTED_PARAMS = %i(local limit only_media remote tags).freeze
   MAX_TAGS = 100
 
   def show
@@ -21,7 +24,7 @@ class Api::V1::Timelines::TagsController < Api::V1::Timelines::BaseController
   def load_statuses
     return [] if tag_names.empty?
 
-    raise(Mastodon::ValidationError) if tag_names.size > MAX_TAGS
+    raise Mastodon::ValidationError, "Too many tags (maximum is #{MAX_TAGS})" if tag_names.size > MAX_TAGS
 
     preload_collection(tags_timeline_statuses, Status)
   end
@@ -47,17 +50,5 @@ class Api::V1::Timelines::TagsController < Api::V1::Timelines::BaseController
 
   def tag_names
     @tag_names ||= Array(params[:tags]).map(&:to_s).compact_blank
-  end
-
-  def permitted_params
-    params.permit(:local, :limit, :only_media, :remote, tags: [])
-  end
-
-  def next_path
-    api_v1_timelines_tags_url next_path_params
-  end
-
-  def prev_path
-    api_v1_timelines_tags_url prev_path_params
   end
 end
