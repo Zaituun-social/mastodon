@@ -1,14 +1,17 @@
 # frozen_string_literal: true
 
 class TagsFeed < PublicFeed
-  # @param [Enumerable<String>] tag_names
+  # @param [Enumerable<String>, nil] tag_names Ignored when :tag_ids is given
   # @param [Account] account
   # @param [Hash] options
+  # @option [Enumerable<Integer>] :tag_ids Pre-resolved tag ids, skips the name lookup
   # @option [Boolean] :local
   # @option [Boolean] :remote
   # @option [Boolean] :only_media
   def initialize(tag_names, account, options = {})
+    options    = options.dup
     @tag_names = Array(tag_names)
+    @tag_ids   = options.delete(:tag_ids)&.to_a
     super(account, options)
   end
 
@@ -36,6 +39,6 @@ class TagsFeed < PublicFeed
   end
 
   def tag_ids
-    Tag.matching_name(@tag_names).pluck(:id) if @tag_names.present?
+    @tag_ids ||= (Tag.matching_name(@tag_names).pluck(:id) if @tag_names.present?)
   end
 end
