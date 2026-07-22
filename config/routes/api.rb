@@ -43,6 +43,7 @@ namespace :api, format: false do
       resources :tag, only: :show
       post :tags, to: 'tags#show'
       resources :interest, only: :show
+      resource :interests, only: :show, controller: :interests
       resources :list, only: :show
     end
 
