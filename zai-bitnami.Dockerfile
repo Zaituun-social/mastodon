@@ -20,6 +20,9 @@ COPY db/schema.rb /opt/bitnami/mastodon/db/schema.rb
 COPY config/routes /opt/bitnami/mastodon/config/routes
 COPY lib/tasks /opt/bitnami/mastodon/lib/tasks
 
+# Copy specs used in image for smoke tests
+COPY spec/requests /opt/bitnami/mastodon/spec/requests
+
 USER 1001
 ENTRYPOINT [ "/opt/bitnami/scripts/mastodon/entrypoint.sh" ]
 CMD [ "/opt/bitnami/scripts/mastodon/run.sh" ]
