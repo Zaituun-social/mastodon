@@ -1,27 +1,18 @@
-FROM --platform=linux/amd64 docker.io/bitnamilegacy/mastodon:4.3.6-debian-12-r0
+FROM --platform=linux/amd64 docker.io/bitnamilegacy/mastodon:4.4.3-debian-12-r11
 
-# Copy Zai-modified-Mastodon sources into layer
-COPY app/javascript/images /opt/bitnami/mastodon/app/javascript/images
-COPY config/locales /opt/bitnami/mastodon/config/locales
-COPY app/views/user_mailer/welcome.html.haml /opt/bitnami/mastodon/app/views/user_mailer
-
-# Copy entire app directories — ensures all changes are captured
-COPY app/controllers /opt/bitnami/mastodon/app/controllers
-COPY app/models /opt/bitnami/mastodon/app/models
-COPY app/services /opt/bitnami/mastodon/app/services
-COPY app/presenters /opt/bitnami/mastodon/app/presenters
-COPY app/serializers /opt/bitnami/mastodon/app/serializers
-
-# Copy entire database layer
-COPY db/migrate /opt/bitnami/mastodon/db/migrate
-COPY db/schema.rb /opt/bitnami/mastodon/db/schema.rb
-
-# Copy entire config and tasks
-COPY config/routes /opt/bitnami/mastodon/config/routes
-COPY lib/tasks /opt/bitnami/mastodon/lib/tasks
-
-# Copy specs used in image for smoke tests
-COPY spec/requests /opt/bitnami/mastodon/spec/requests
+# Apply the Zai fork's delta against upstream Mastodon.
+#
+# .zai-overlay/ mirrors the Mastodon tree and contains ONLY the files this fork
+# actually changed. Generate it before building:
+#
+#   ./bin/zai-overlay && docker build -f zai-bitnami.Dockerfile .
+#
+# Do not replace this with directory-wide COPYs (app/controllers, app/models,
+# lib/tasks, ...). Those also copy unmodified upstream files from this checkout
+# over the base image's own code; because the checkout and the image are
+# different Mastodon builds, that breaks the image at boot. See bin/zai-overlay
+# for the three boot failures this has already caused.
+COPY .zai-overlay/ /opt/bitnami/mastodon/
 
 USER 1001
 ENTRYPOINT [ "/opt/bitnami/scripts/mastodon/entrypoint.sh" ]

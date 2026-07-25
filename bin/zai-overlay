@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+#
+# Stage the Zai fork's delta against upstream Mastodon into .zai-overlay/, so the
+# Docker build can apply it with a single COPY.
+#
+# Why this exists: zai-bitnami.Dockerfile layers our changes onto a prebuilt
+# upstream image. Copying whole directories (app/controllers, app/models,
+# lib/tasks, ...) also copies hundreds of *unmodified* upstream files from this
+# checkout. Our checkout and the base image are different Mastodon builds, so
+# those files silently overwrite the image's own code and break it at boot.
+# Three separate boot failures were observed from exactly that:
+#
+#   1. 4.4 app/controllers/application_controller.rb on a 4.3.6 image
+#      -> uninitialized constant Mastodon::HTTP_CONNECTION_ERRORS
+#   2. lib/tasks/webpacker.rake (deleted upstream) resurrected into 4.4.3
+#      -> LoadError: cannot load such file -- semantic_range, aborting ALL
+#         rake tasks including db:migrate
+#   3. our app/controllers/oauth/*.rb (class Oauth::) on a 4.4.3 image whose
+#      config/initializers/inflections.rb declares acronym 'OAuth'
+#      -> uninitialized constant Oauth
+#
+# Copying only the files we actually changed avoids that entire class of bug,
+# and deriving the list from git means it never goes stale the way a
+# hand-maintained COPY list does.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+# Last upstream commit merged into this fork ("Merge branch 'mastodon:main'").
+# Update this when you sync with upstream:
+#   git log --first-parent --grep="Merge branch 'mastodon:main'" -1 --format=%P | awk '{print $2}'
+UPSTREAM_BASE="${ZAI_UPSTREAM_BASE:-498372fd06bfb0235b75888629ca5de0336ccd71}"
+
+OVERLAY_DIR=".zai-overlay"
+
+# Files that are ours but must not go into the image: build/dev tooling only.
+EXCLUDE_RE='^(zai-bitnami\.Dockerfile|Vagrantfile|\.env\.vagrant)$'
+
+if ! git cat-file -e "${UPSTREAM_BASE}^{commit}" 2>/dev/null; then
+  echo "error: upstream base ${UPSTREAM_BASE} not found in this repo." >&2
+  echo "       fetch it, or set ZAI_UPSTREAM_BASE to the correct commit." >&2
+  exit 1
+fi
+
+rm -rf "$OVERLAY_DIR"
+mkdir -p "$OVERLAY_DIR"
+
+# --diff-filter=ACMR: added/copied/modified/renamed. Deletions are intentionally
+# ignored — we cannot delete files from the base image with COPY, and we do not
+# currently remove any upstream file.
+#
+# NB: read loop rather than mapfile — macOS still ships bash 3.2.
+files=()
+while IFS= read -r f; do
+  files+=("$f")
+done < <(
+  git diff --name-only --diff-filter=ACMR "$UPSTREAM_BASE" HEAD \
+    | grep -Ev "$EXCLUDE_RE"
+)
+
+if [ ${#files[@]} -eq 0 ]; then
+  echo "error: no changed files found vs ${UPSTREAM_BASE} — refusing to build an empty overlay." >&2
+  exit 1
+fi
+
+for f in "${files[@]}"; do
+  if [ ! -e "$f" ]; then
+    echo "error: ${f} is in the diff but missing from the working tree." >&2
+    exit 1
+  fi
+  mkdir -p "$OVERLAY_DIR/$(dirname "$f")"
+  cp -p "$f" "$OVERLAY_DIR/$f"
+done
+
+echo "Staged ${#files[@]} file(s) into ${OVERLAY_DIR}/ (base ${UPSTREAM_BASE:0:9})"
