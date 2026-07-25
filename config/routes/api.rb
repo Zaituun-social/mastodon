@@ -42,6 +42,8 @@ namespace :api, format: false do
       resource :link, only: :show, controller: :link
       resources :tag, only: :show
       post :tags, to: 'tags#show'
+      resources :interest, only: :show
+      resource :interests, only: :show, controller: :interests
       resources :list, only: :show
     end
 
@@ -217,6 +219,13 @@ namespace :api, format: false do
       end
     end
 
+    # `interests/me` is declared first so the literal always wins over a future
+    # `interests/:name` route ("me" is a syntactically valid interest name).
+    get 'interests/me', to: 'interests#me', as: :my_interests
+    put 'interests/me', to: 'interests#update_me'
+    get 'interests', to: 'interests#index', as: :interests
+    get 'interests/:name/tags', to: 'interests/tags#index', as: :interest_tags
+
     resources :followed_tags, only: [:index]
 
     resources :lists, only: [:index, :create, :show, :update, :destroy] do
@@ -320,6 +329,11 @@ namespace :api, format: false do
       patch 'accounts', to: 'accounts#update'
       delete 'accounts', to: 'accounts#destroy'
       resources :tokens, only: [:create]
+
+      post 'interests/bulk', to: 'interests#bulk'
+      get 'interests/:name/tags', to: 'interests#tags'
+      post 'interests', to: 'interests#create'
+      delete 'interests', to: 'interests#destroy'
     end
   end
 

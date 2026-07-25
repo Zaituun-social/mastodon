@@ -8,6 +8,7 @@ module Account::Associations
     with_options dependent: :destroy do
       # Association where account owns record
       with_options inverse_of: :account do
+        has_many :account_interests
         has_many :account_moderation_notes
         has_many :account_pins
         has_many :account_warnings
@@ -55,6 +56,9 @@ module Account::Associations
 
     # List records the account has been added to (not owned by the account)
     has_many :lists, through: :list_accounts
+
+    # Interest records the account has selected
+    has_many :interests, through: :account_interests
 
     # Account record where account has been migrated
     belongs_to :moved_to_account, class_name: 'Account', optional: true

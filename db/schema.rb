@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_13_123400) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_20_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -48,6 +48,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_13_123400) do
     t.datetime "updated_at", precision: nil, null: false
     t.bigint "account_id", null: false
     t.index ["account_id", "domain"], name: "index_account_domain_blocks_on_account_id_and_domain", unique: true
+  end
+
+  create_table "account_interests", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "interest_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "interest_id"], name: "index_account_interests_on_account_id_and_interest_id", unique: true
+    t.index ["interest_id"], name: "index_account_interests_on_interest_id"
   end
 
   create_table "account_migrations", force: :cascade do |t|
@@ -566,6 +575,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_13_123400) do
     t.datetime "data_updated_at", precision: nil
     t.bigint "account_id", null: false
     t.boolean "overwrite", default: false, null: false
+  end
+
+  create_table "interest_tags", force: :cascade do |t|
+    t.bigint "interest_id", null: false
+    t.bigint "tag_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["interest_id", "tag_id"], name: "index_interest_tags_on_interest_id_and_tag_id", unique: true
+    t.index ["tag_id"], name: "index_interest_tags_on_tag_id"
+  end
+
+  create_table "interests", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "lower((name)::text)", name: "index_interests_on_name_lower", unique: true
   end
 
   create_table "invites", force: :cascade do |t|
@@ -1274,6 +1299,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_13_123400) do
   add_foreign_key "account_conversations", "conversations", on_delete: :cascade
   add_foreign_key "account_deletion_requests", "accounts", on_delete: :cascade
   add_foreign_key "account_domain_blocks", "accounts", name: "fk_206c6029bd", on_delete: :cascade
+  add_foreign_key "account_interests", "accounts", on_delete: :cascade
+  add_foreign_key "account_interests", "interests", on_delete: :cascade
   add_foreign_key "account_migrations", "accounts", column: "target_account_id", on_delete: :nullify
   add_foreign_key "account_migrations", "accounts", on_delete: :cascade
   add_foreign_key "account_moderation_notes", "accounts", column: "target_account_id", on_delete: :cascade
@@ -1330,6 +1357,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_13_123400) do
   add_foreign_key "generated_annual_reports", "accounts"
   add_foreign_key "identities", "users", name: "fk_bea040f377", on_delete: :cascade
   add_foreign_key "imports", "accounts", name: "fk_6db1b6e408", on_delete: :cascade
+  add_foreign_key "interest_tags", "interests", on_delete: :cascade
+  add_foreign_key "interest_tags", "tags", on_delete: :cascade
   add_foreign_key "invites", "users", on_delete: :cascade
   add_foreign_key "list_accounts", "accounts", on_delete: :cascade
   add_foreign_key "list_accounts", "follow_requests", on_delete: :cascade

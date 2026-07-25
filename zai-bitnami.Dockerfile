@@ -5,15 +5,23 @@ COPY app/javascript/images /opt/bitnami/mastodon/app/javascript/images
 COPY config/locales /opt/bitnami/mastodon/config/locales
 COPY app/views/user_mailer/welcome.html.haml /opt/bitnami/mastodon/app/views/user_mailer
 
-# Copy internal API files
-COPY app/controllers/api/v1/internal /opt/bitnami/mastodon/app/controllers/api/v1/internal
-COPY app/services/internal /opt/bitnami/mastodon/app/services/internal
-COPY config/routes/api.rb /opt/bitnami/mastodon/config/routes/api.rb
+# Copy entire app directories — ensures all changes are captured
+COPY app/controllers /opt/bitnami/mastodon/app/controllers
+COPY app/models /opt/bitnami/mastodon/app/models
+COPY app/services /opt/bitnami/mastodon/app/services
+COPY app/presenters /opt/bitnami/mastodon/app/presenters
+COPY app/serializers /opt/bitnami/mastodon/app/serializers
 
-# Copy multi-tag timeline endpoint
-COPY app/models/tags_feed.rb /opt/bitnami/mastodon/app/models/tags_feed.rb
-COPY spec/requests/api/v1/timelines/tags_spec.rb /opt/bitnami/mastodon/spec/requests/api/v1/timelines/tags_spec.rb
-COPY app/controllers/api/v1/timelines/tags_controller.rb /opt/bitnami/mastodon/app/controllers/api/v1/timelines/tags_controller.rb
+# Copy entire database layer
+COPY db/migrate /opt/bitnami/mastodon/db/migrate
+COPY db/schema.rb /opt/bitnami/mastodon/db/schema.rb
+
+# Copy entire config and tasks
+COPY config/routes /opt/bitnami/mastodon/config/routes
+COPY lib/tasks /opt/bitnami/mastodon/lib/tasks
+
+# Copy specs used in image for smoke tests
+COPY spec/requests /opt/bitnami/mastodon/spec/requests
 
 USER 1001
 ENTRYPOINT [ "/opt/bitnami/scripts/mastodon/entrypoint.sh" ]
