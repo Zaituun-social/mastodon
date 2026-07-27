@@ -89,6 +89,44 @@ class MastodonClient:
             data={"display_name": display_name},
         )
 
+    # -- interest catalog ------------------------------------------------
+
+    def list_interests(self, token=None):
+        """GET /api/v1/interests -- the curated, unpaginated interest list
+        (name, tags_count, last_status_at). Token-optional: works
+        anonymously unless this instance disallows unauthenticated API
+        access, in which case pass any account's access token."""
+        return self._request("GET", "/api/v1/interests", token=token)
+
+    def list_interest_tags(self, name, token=None):
+        """GET /api/v1/interests/:name/tags -- public, but paginated
+        (100/page via the standard Link-header cursor), unlike the
+        internal-token-guarded unpaginated version. Walks every page and
+        returns the full list of tag names for one interest."""
+        names = []
+        url = f"{self.base_url}/api/v1/interests/{name}/tags"
+        params = {"limit": 100}
+        headers = self._headers(token=token)
+
+        while url:
+            response = self.session.get(url, headers=headers, params=params, timeout=30)
+
+            if response.status_code == 429:
+                wait = int(response.headers.get("X-RateLimit-Reset-After", "60")) or 60
+                time.sleep(max(wait, 1))
+                continue
+
+            if not response.ok:
+                raise ApiError(response)
+
+            names.extend(tag["name"] for tag in response.json())
+
+            next_link = response.links.get("next")
+            url = next_link["url"] if next_link else None
+            params = None  # the next link already carries its own query params
+
+        return names
+
     # -- timelines / statuses -----------------------------------------
 
     def tags_timeline(self, tags, token, max_id=None, limit=config.PAGE_LIMIT):

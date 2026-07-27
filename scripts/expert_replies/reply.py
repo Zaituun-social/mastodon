@@ -34,11 +34,11 @@ def save_replied_log(log):
 
 
 def _post_reply(store, queue, log, item, reply_text):
-    """Posts reply_text to item via a random account for its supertag,
+    """Posts reply_text to item via a random account for its interest,
     marks item as replied, and persists queue.json + replied_log.json.
     Returns the created status dict, or raises ApiError."""
 
-    account = random_account(store, item["supertag"])
+    account = random_account(store, item["interest"])
     client = MastodonClient(access_token=account["access_token"])
 
     status = client.post_status(account["access_token"], reply_text, in_reply_to_id=item["id"])
@@ -50,7 +50,7 @@ def _post_reply(store, queue, log, item, reply_text):
         "parent_id": item["id"],
         "reply_id": status.get("id"),
         "account": account["username"],
-        "supertag": item["supertag"],
+        "interest": item["interest"],
         "tag": item["tag"],
         "reply_text": reply_text,
         "created_at": status.get("created_at"),
@@ -74,7 +74,7 @@ def run_interactive():
 
     for item in pending:
         print("-" * 60)
-        print(f"supertag: {item['supertag']}   tag: #{item['tag']}")
+        print(f"interest: {item['interest']}   tag: #{item['tag']}")
         print(f"from: @{item['account_acct']}   url: {item['url']}")
         if item["is_duplicate"]:
             print(f"[!] flagged as near-duplicate of {item['duplicate_of']} -- consider skipping")

@@ -17,7 +17,7 @@ BASE_URL = os.environ.get("MASTODON_BASE_URL", "").rstrip("/")
 DATA_DIR = Path(os.environ.get("EXPERT_REPLIES_DATA_DIR", Path(__file__).parent / "data"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-SUPERTAGS_FILE = Path(os.environ.get("SUPERTAGS_FILE", Path(__file__).resolve().parents[2] / "temp"))
+INTERESTS_FILE = Path(os.environ.get("INTERESTS_FILE", DATA_DIR / "interests.json"))
 
 ACCOUNTS_FILE = DATA_DIR / "accounts.json"
 QUEUE_FILE = DATA_DIR / "queue.json"
@@ -44,7 +44,7 @@ def require_email_alias_base() -> str:
         )
     return EMAIL_ALIAS_BASE
 
-ACCOUNTS_PER_SUPERTAG = int(os.environ.get("ACCOUNTS_PER_SUPERTAG", "2"))
+ACCOUNTS_PER_INTEREST = int(os.environ.get("ACCOUNTS_PER_INTEREST", "2"))
 PAGES_PER_TAG = int(os.environ.get("PAGES_PER_TAG", "2"))
 PAGE_LIMIT = int(os.environ.get("PAGE_LIMIT", "20"))
 DUPLICATE_THRESHOLD = float(os.environ.get("DUPLICATE_THRESHOLD", "0.85"))

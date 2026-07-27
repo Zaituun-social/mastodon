@@ -22,8 +22,8 @@ STATUS_ID_COLUMN_HEADER = "Status ID"
 # key is None for the Reply column: it's an input field with no matching
 # queue.json field, so it always renders blank on (re)export.
 COLUMNS = [
-    ("supertag", "Supertag", 22),
-    ("matched_supertags", "Matched Supertags", 30),
+    ("interest", "Interest", 22),
+    ("matched_interests", "Matched Interests", 30),
     ("tag", "Tag", 18),
     ("account_acct", "From", 18),
     ("content_text", "Post", 60),
@@ -56,8 +56,8 @@ def write_xlsx(queue, path=None):
             value = item.get(key)
             if key in ("is_duplicate", "replied"):
                 value = "Yes" if value else "No"
-            elif key == "matched_supertags":
-                value = ", ".join(value or [item.get("supertag")])
+            elif key == "matched_interests":
+                value = ", ".join(value or [item.get("interest")])
             cell = ws.cell(row=row_idx, column=col_idx, value=value)
             cell.alignment = Alignment(wrap_text=True, vertical="top", horizontal="right")
 

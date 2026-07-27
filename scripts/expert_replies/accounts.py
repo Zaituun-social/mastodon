@@ -1,4 +1,4 @@
-"""Creates and persists the pool of fake per-supertag accounts.
+"""Creates and persists the pool of fake per-interest accounts.
 
 Uses this fork's internal API (/api/v1/internal/accounts + /internal/tokens,
 guarded by X-Internal-Token) so accounts come out pre-confirmed and
@@ -7,7 +7,7 @@ confirmation loop or OAuth app registration needed.
 
 Everything is idempotent against accounts.json: accounts already recorded
 there (with a token) are reused as-is, so re-running only tops up whatever
-is missing -- e.g. after adding a new supertag, or resuming after a run
+is missing -- e.g. after adding a new interest, or resuming after a run
 that got interrupted partway through.
 """
 
@@ -29,8 +29,8 @@ def save_store(store):
     config.ACCOUNTS_FILE.write_text(json.dumps(store, ensure_ascii=False, indent=2))
 
 
-def load_supertags(path=None):
-    return json.loads((path or config.SUPERTAGS_FILE).read_text())
+def load_interests(path=None):
+    return json.loads((path or config.INTERESTS_FILE).read_text())
 
 
 def _aliased_email(username):
@@ -49,12 +49,12 @@ def _pick_name(used_usernames):
     raise RuntimeError("could not find a free username after 200 attempts")
 
 
-def ensure_accounts(supertags_file=None, per_supertag=None):
-    """Make sure every supertag has `per_supertag` registered accounts,
+def ensure_accounts(interests_file=None, per_interest=None):
+    """Make sure every interest has `per_interest` registered accounts,
     creating only whatever is missing. Returns the updated store."""
 
-    per_supertag = per_supertag or config.ACCOUNTS_PER_SUPERTAG
-    supertags = load_supertags(supertags_file)
+    per_interest = per_interest or config.ACCOUNTS_PER_INTEREST
+    interests = load_interests(interests_file)
 
     client = MastodonClient()
     store = load_store()
@@ -65,14 +65,14 @@ def ensure_accounts(supertags_file=None, per_supertag=None):
         for acct in accts
     }
 
-    for entry in supertags:
-        supertag = entry["supertag"]
-        existing = store["accounts"].setdefault(supertag, [])
-        missing = per_supertag - len(existing)
+    for entry in interests:
+        interest = entry["interest"]
+        existing = store["accounts"].setdefault(interest, [])
+        missing = per_interest - len(existing)
         if missing <= 0:
             continue
 
-        print(f"[{supertag}] have {len(existing)}, creating {missing} more")
+        print(f"[{interest}] have {len(existing)}, creating {missing} more")
         for _ in range(missing):
             display_name, username = _pick_name(used_usernames)
             used_usernames.add(username)
@@ -88,7 +88,7 @@ def ensure_accounts(supertags_file=None, per_supertag=None):
                 continue
 
             existing.append({
-                "supertag": supertag,
+                "interest": interest,
                 "account_id": account_id,
                 "display_name": display_name,
                 "username": username,
@@ -102,12 +102,12 @@ def ensure_accounts(supertags_file=None, per_supertag=None):
     return store
 
 
-def accounts_for_supertag(store, supertag):
-    return store["accounts"].get(supertag, [])
+def accounts_for_interest(store, interest):
+    return store["accounts"].get(interest, [])
 
 
-def random_account(store, supertag):
-    pool = accounts_for_supertag(store, supertag)
+def random_account(store, interest):
+    pool = accounts_for_interest(store, interest)
     if not pool:
-        raise RuntimeError(f"no accounts registered for supertag {supertag!r}; run the `accounts` step first")
+        raise RuntimeError(f"no accounts registered for interest {interest!r}; run the `accounts` step first")
     return random.choice(pool)
