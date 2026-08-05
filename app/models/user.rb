@@ -144,7 +144,7 @@ class User < ApplicationRecord
   delegate :can?, to: :role
 
   attr_reader :invite_code, :date_of_birth
-  attr_writer :external, :bypass_invite_request_check, :current_account
+  attr_writer :external, :bypass_registration_checks, :current_account
 
   def self.those_who_can(*any_of_privileges)
     matching_role_ids = UserRole.that_can(*any_of_privileges).map(&:id)
@@ -501,8 +501,8 @@ class User < ApplicationRecord
     !!@external
   end
 
-  def bypass_invite_request_check?
-    @bypass_invite_request_check
+  def bypass_registration_checks?
+    @bypass_registration_checks
   end
 
   def sanitize_role
@@ -549,7 +549,7 @@ class User < ApplicationRecord
   end
 
   def invite_text_required?
-    Setting.require_invite_text && !open_registrations? && !invited? && !external? && !bypass_invite_request_check?
+    Setting.require_invite_text && !open_registrations? && !invited? && !external? && !bypass_registration_checks?
   end
 
   def trigger_webhooks

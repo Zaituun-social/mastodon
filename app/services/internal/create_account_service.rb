@@ -13,7 +13,7 @@ class Internal::CreateAccountService < BaseService
       agreement: true,
       role_id: role_id,
       confirmed_at: confirmed ? Time.now.utc : nil,
-      bypass_invite_request_check: true
+      bypass_registration_checks: true
     )
 
     account.suspended_at = nil
