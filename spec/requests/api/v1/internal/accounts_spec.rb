@@ -246,4 +246,68 @@ RSpec.describe 'Internal Accounts API' do
       end
     end
   end
+
+
+  describe 'GET /api/v1/internal/accounts/:id/interests' do
+    let(:account) { Fabricate(:account) }
+
+    # One account that: follows #baking (and posts in it) and #quiet (never
+    # posts in it), posts in the unfollowed #extra, and has selected the
+    # "cooking" interest, which #baking belongs to.
+    let(:baking) { Fabricate(:tag, name: 'baking') }
+
+    before do
+      quiet    = Fabricate(:tag, name: 'quiet')
+      extra    = Fabricate(:tag, name: 'extra')
+      interest = Fabricate(:interest, name: 'cooking')
+
+      Fabricate(:interest_tag, interest: interest, tag: baking)
+      Fabricate(:account_interest, account: account, interest: interest)
+      Fabricate(:tag_follow, account: account, tag: baking)
+      Fabricate(:tag_follow, account: account, tag: quiet)
+      Fabricate(:status, account: account, tags: [baking, extra])
+    end
+
+    def get_interests(id: account.id, token: internal_token)
+      get "/api/v1/internal/accounts/#{id}/interests", headers: { 'X-Internal-Token' => token }
+    end
+
+    it 'rejects a bad token and an unknown account' do
+      get_interests(token: 'wrong-token')
+      expect(response).to have_http_status(401)
+
+      get_interests(id: 0)
+      expect(response).to have_http_status(404)
+    end
+
+    it 'returns interests and tags ranked by the account\'s own activity' do
+      get_interests
+
+      expect(response).to have_http_status(200)
+      json = response.parsed_body
+
+      expect(json).to include('account_id' => account.id.to_s, 'username' => account.username, 'followed_tags_count' => 2, 'followed_tags_truncated' => false)
+
+      # Tag activity cascades up to the interest that tag belongs to.
+      expect(json['interests'].first).to include('name' => 'cooking', 'tags_count' => 1, 'statuses_count' => 1)
+
+      # Followed tags rank by activity; one followed but never posted in is last.
+      expect(json['followed_tags'].map { |tag| tag['name'] }).to eq(%w(baking quiet))
+      expect(json['followed_tags'].last).to include('statuses_count' => 0, 'last_status_at' => nil)
+
+      # Active tags include one the account posts in but does not follow.
+      expect(json['active_tags'].map { |tag| [tag['name'], tag['following']] }).to contain_exactly(['baking', true], ['extra', false])
+    end
+
+    it 'truncates followed tags to the least active, keeping the true total' do
+      stub_const('Api::V1::Internal::AccountsController::FOLLOWED_TAGS_LIMIT', 1)
+
+      get_interests
+
+      expect(response).to have_http_status(200)
+      json = response.parsed_body
+      expect(json['followed_tags'].map { |tag| tag['name'] }).to eq(%w(baking))
+      expect(json).to include('followed_tags_count' => 2, 'followed_tags_truncated' => true)
+    end
+  end
 end

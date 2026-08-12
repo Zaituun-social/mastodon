@@ -321,6 +321,7 @@ namespace :api, format: false do
       resources :accounts, only: [:create] do
         member do
           post :approve
+          get :interests
         end
         collection do
           post :approve_batch
